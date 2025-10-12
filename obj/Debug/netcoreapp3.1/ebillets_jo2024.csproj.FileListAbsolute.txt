@@ -1,8 +1,0 @@
-Z:\EVALUATION\PROJET\ebillets_jo2024\ebillets_jo2024\obj\Debug\netcoreapp3.1\ebillets_jo2024.csproj.AssemblyReference.cache
-Z:\EVALUATION\PROJET\ebillets_jo2024\ebillets_jo2024\obj\Debug\netcoreapp3.1\ebillets_jo2024.GeneratedMSBuildEditorConfig.editorconfig
-Z:\EVALUATION\PROJET\ebillets_jo2024\ebillets_jo2024\obj\Debug\netcoreapp3.1\ebillets_jo2024.AssemblyInfoInputs.cache
-Z:\EVALUATION\PROJET\ebillets_jo2024\ebillets_jo2024\obj\Debug\netcoreapp3.1\ebillets_jo2024.AssemblyInfo.cs
-Z:\EVALUATION\PROJET\ebillets_jo2024\ebillets_jo2024\obj\Debug\netcoreapp3.1\ebillets_jo2024.csproj.CoreCompileInputs.cache
-Z:\EVALUATION\PROJET\ebillets_jo2024\ebillets_jo2024\obj\Debug\netcoreapp3.1\ebillets_jo2024.MvcApplicationPartsAssemblyInfo.cache
-Z:\EVALUATION\PROJET\ebillets_jo2024\ebillets_jo2024\obj\Debug\netcoreapp3.1\ebillets_jo2024.RazorAssemblyInfo.cache
-Z:\EVALUATION\PROJET\ebillets_jo2024\ebillets_jo2024\obj\Debug\netcoreapp3.1\ebillets_jo2024.RazorAssemblyInfo.cs
