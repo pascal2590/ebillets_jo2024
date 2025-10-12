@@ -1,0 +1,68 @@
+# ===================================
+# C# / ASP.NET
+# ===================================
+bin/
+obj/
+Debug/
+Release/
+x64/
+x86/
+*.nupkg
+packages/
+*.snupkg
+*.log
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.vs/
+*.tmp
+*.temp
+*.cache
+*.dbmdl
+*.pdb
+_ReSharper*/
+*.DotSettings.user
+TestResults/
+*.coverage
+*.coveragexml
+
+# ===================================
+# Angular / Node.js / Front-end
+# ===================================
+node_modules/
+dist/
+tmp/
+out-tsc/
+.angular/
+.angular-cache/
+.angular-cli.json
+package-lock.json
+yarn.lock
+npm-debug.log*
+yarn-error.log*
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ===================================
+# Bootstrap / assets générés
+# ===================================
+wwwroot/lib/
+wwwroot/dist/
+
+# ===================================
+# Dossier personnel à ignorer
+# ===================================
+Aide/
+
+# ===================================
+# Autres fichiers communs
+# ===================================
+*.bak
+*.swp
+*.DS_Store
+Thumbs.db
+.vscode/
