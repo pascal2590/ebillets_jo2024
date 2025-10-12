@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ebillets_jo2024.Models
 {
+    [Table("paiement")]
     public class Paiement
     {
         [Key]

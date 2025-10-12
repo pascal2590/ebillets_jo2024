@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ebillets_jo2024.Models
 {
+    [Table("scan_billet")]
     public class ScanBillet
     {
         [Key]

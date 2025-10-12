@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ebillets_jo2024.Models
 {
+    [Table("panier")]
     public class Panier
     {
         [Key]

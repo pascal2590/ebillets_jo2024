@@ -22,6 +22,22 @@ namespace ebillets_jo2024.Controllers
             _context = context;
         }
 
+        [HttpGet("test-connexion")]
+        public IActionResult TestConnexion()
+        {
+            try
+            {
+                var isConnected = _context.Database.CanConnect();
+                return Ok(new { connected = isConnected });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { connected = false, error = ex.Message });
+            }
+        }
+
+
+
         // GET: api/Utilisateur
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Utilisateur>>> GetUtilisateurs()
