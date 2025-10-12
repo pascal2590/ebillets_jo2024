@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ebillets_jo2024.Models
 {
+    [Table("panier_offre")]
     public class PanierOffre
     {
         [Key, Column(Order = 0)]
