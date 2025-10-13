@@ -1,40 +1,36 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ebillets_jo2024.Data;
+﻿using ebillets_jo2024.Data;
 using ebillets_jo2024.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
-namespace ebillets_jo2024.Controllers
+[Route("api/[controller]")]
+[ApiController]
+public class ScanBilletController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class ScanBilletController : ControllerBase
+    private readonly ApplicationDbContext _context;
+    public ScanBilletController(ApplicationDbContext context) { _context = context; }
+
+    // POST: api/ScanBillet/{cleFinale}?idEmploye=1
+    [HttpPost("{cleFinale}")]
+    public async Task<IActionResult> ScannerBillet(string cleFinale, [FromQuery] int idEmploye = 0)
     {
-        private readonly ApplicationDbContext _context;
+        var billet = await _context.Billets.FirstOrDefaultAsync(b => b.CleFinale == cleFinale);
+        if (billet == null) return NotFound("Billet invalide.");
+        if (billet.Statut == "Utilisé") return BadRequest("Billet déjà utilisé.");
 
-        public ScanBilletController(ApplicationDbContext context)
+        billet.Statut = "Utilisé";
+        _context.Billets.Update(billet);
+
+        var scan = new ScanBillet
         {
-            _context = context;
-        }
+            IdBillet = billet.IdBillet,
+            IdEmploye = idEmploye > 0 ? idEmploye : 1,
+            Resultat = "Valide"
+        };
+        _context.ScansBillets.Add(scan);
+        await _context.SaveChangesAsync();
 
-        [HttpPost("{cleFinale}")]
-        public async Task<IActionResult> ScannerBillet(string cleFinale)
-        {
-            var reservation = await _context.Reservations.FirstOrDefaultAsync(r => r.CleFinale == cleFinale);
-            if (reservation == null)
-                return NotFound("Billet invalide.");
-
-            var scan = new ScanBillet
-            {
-                IdReservation = reservation.IdReservation,
-                IdEmploye = 1, // Exemple : employé connecté
-                Resultat = "Valide"
-            };
-
-            _context.ScansBillets.Add(scan); // Remplacé ScanBillet en ScansBillets voir fichier "ApplicationDbContext.cs"
-            await _context.SaveChangesAsync();
-
-            return Ok(scan);
-        }
+        return Ok(new { billet.IdBillet, billet.QrCode, message = "Billet validé" });
     }
 }

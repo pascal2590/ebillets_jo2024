@@ -5,28 +5,27 @@ namespace ebillets_jo2024.Data
 {
     public class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
-        {
-        }
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
-        // === Tables principales ===
         public DbSet<Utilisateur> Utilisateurs { get; set; }
         public DbSet<Offre> Offres { get; set; }
+        public DbSet<Reservation> Reservations { get; set; }
         public DbSet<Panier> Paniers { get; set; }
         public DbSet<PanierOffre> PaniersOffres { get; set; }
-        public DbSet<Reservation> Reservations { get; set; }
         public DbSet<Paiement> Paiements { get; set; }
+        public DbSet<Billet> Billets { get; set; }
         public DbSet<ScanBillet> ScansBillets { get; set; }
+        public DbSet<Administrateur> Administrateurs { get; set; } // optionnel
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // === Table PanierOffre : clé composite ===
+            // clé composite PanierOffre
             modelBuilder.Entity<PanierOffre>()
                 .HasKey(po => new { po.IdPanier, po.IdOffre });
 
+            // PanierOffre relations
             modelBuilder.Entity<PanierOffre>()
                 .HasOne(po => po.Panier)
                 .WithMany(p => p.PaniersOffres)
@@ -39,47 +38,47 @@ namespace ebillets_jo2024.Data
                 .HasForeignKey(po => po.IdOffre)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // === Relation Utilisateur → Panier (1-N)
-            modelBuilder.Entity<Panier>()
-                .HasOne(p => p.Utilisateur)
-                .WithMany(u => u.Paniers)
-                .HasForeignKey(p => p.IdUtilisateur)
+            // Reservation -> Billet (1 - N)
+            modelBuilder.Entity<Billet>()
+                .HasOne(b => b.Reservation)
+                .WithMany(r => r.Billets)
+                .HasForeignKey(b => b.IdReservation)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // === Relation Utilisateur → Reservation (1-N)
-            modelBuilder.Entity<Reservation>()
-                .HasOne(r => r.Utilisateur)
-                .WithMany(u => u.Reservations)
-                .HasForeignKey(r => r.IdUtilisateur)
+            // Billet -> Offre (N - 1)
+            modelBuilder.Entity<Billet>()
+                .HasOne(b => b.Offre)
+                .WithMany()
+                .HasForeignKey(b => b.IdOffre)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // === Relation Offre → Reservation (1-N)
-            modelBuilder.Entity<Reservation>()
-                .HasOne(r => r.Offre)
-                .WithMany(o => o.Reservations)
-                .HasForeignKey(r => r.IdOffre)
+            // ScanBillet -> Billet
+            modelBuilder.Entity<ScanBillet>()
+                .HasOne(s => s.Billet)
+                .WithMany(b => b.ScansBillets)
+                .HasForeignKey(s => s.IdBillet)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // === Relation Reservation → Paiement (1-1)
+            // ScanBillet -> Employe (Utilisateur)
+            modelBuilder.Entity<ScanBillet>()
+                .HasOne(s => s.Employe)
+                .WithMany()
+                .HasForeignKey(s => s.IdEmploye)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Paiement -> Reservation (1 - 1)
             modelBuilder.Entity<Paiement>()
                 .HasOne(p => p.Reservation)
                 .WithOne(r => r.Paiement)
                 .HasForeignKey<Paiement>(p => p.IdReservation)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // === Relation ScanBillet → Reservation (1-N)
-            modelBuilder.Entity<ScanBillet>()
-                .HasOne(s => s.Reservation)
+            // Administrateur -> Utilisateur (optionnel)
+            modelBuilder.Entity<Administrateur>()
+                .HasOne(a => a.Utilisateur)
                 .WithMany()
-                .HasForeignKey(s => s.IdReservation)
+                .HasForeignKey(a => a.IdUtilisateur)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            // === Relation ScanBillet → Employé (1-N, auto-référence à Utilisateur)
-            modelBuilder.Entity<ScanBillet>()
-                .HasOne(s => s.Employe)
-                .WithMany()
-                .HasForeignKey(s => s.IdEmploye)
-                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

@@ -3,58 +3,77 @@ using ebillets_jo2024.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ebillets_jo2024.Controllers
+[Route("api/[controller]")]
+[ApiController]
+public class ReservationController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class ReservationController : ControllerBase
+    private readonly ApplicationDbContext _context;
+    public ReservationController(ApplicationDbContext context) { _context = context; }
+
+    [HttpPost]
+    public async Task<ActionResult<Reservation>> PostReservation(Reservation reservation)
     {
-        private readonly ApplicationDbContext _context;
+        var user = await _context.Utilisateurs.FindAsync(reservation.IdUtilisateur);
+        var offre = await _context.Offres.FindAsync(reservation.IdOffre);
+        if (user == null || offre == null)
+            return BadRequest("Utilisateur ou offre introuvable.");
 
-        public ReservationController(ApplicationDbContext context)
+        // Générer cleReservation
+        reservation.CleReservation = GenerateKey();
+        reservation.Statut = "En attente";
+
+        // Sauvegarder réservation
+        _context.Reservations.Add(reservation);
+        await _context.SaveChangesAsync();
+
+        // Créer billets : offre.nbPersonnes * reservation.quantite (par unité)
+        int nbBillets = offre.NbPersonnes * (reservation.Quantite <= 0 ? 1 : reservation.Quantite);
+        var billets = new List<Billet>();
+        for (int i = 0; i < nbBillets; i++)
         {
-            _context = context;
+            var cleBillet = GenerateKey();
+            var cleFinale = ComputeSha256Hash(user.CleUtilisateur + reservation.CleReservation + cleBillet);
+            var billet = new Billet
+            {
+                IdReservation = reservation.IdReservation,
+                IdOffre = reservation.IdOffre,
+                CleBillet = cleBillet,
+                CleFinale = cleFinale,
+                QrCode = "QR_" + cleFinale.Substring(0, 20),
+                Statut = "Valide"
+            };
+            billets.Add(billet);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetReservations()
-        {
-            var reservations = await _context.Reservations
-                .Include(r => r.Utilisateur)
-                .Include(r => r.Offre)
-                .ToListAsync();
-            return Ok(reservations);
-        }
+        _context.Billets.AddRange(billets);
+        await _context.SaveChangesAsync();
 
-        [HttpPost]
-        public async Task<ActionResult<Reservation>> PostReservation(Reservation reservation)
-        {
-            reservation.CleReservation = GenerateKey();
-            var user = await _context.Utilisateurs.FindAsync(reservation.IdUtilisateur);
+        var result = await _context.Reservations
+            .Include(r => r.Billets)
+            .FirstOrDefaultAsync(r => r.IdReservation == reservation.IdReservation);
 
-            if (user == null)
-                return BadRequest("Utilisateur introuvable.");
+        return CreatedAtAction(nameof(PostReservation), new { id = reservation.IdReservation }, result);
+    }
 
-            reservation.CleFinale = user.CleUtilisateur + reservation.CleReservation;
-            reservation.QrCode = "QR_" + reservation.CleFinale.Substring(0, 10); // Simulation du QRCode
+    private string GenerateKey()
+    {
+        using var rng = RandomNumberGenerator.Create();
+        var bytes = new byte[32];
+        rng.GetBytes(bytes);
+        return BitConverter.ToString(bytes).Replace("-", "").ToLower();
+    }
 
-            _context.Reservations.Add(reservation);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(PostReservation), new { id = reservation.IdReservation }, reservation);
-        }
-
-        private string GenerateKey()
-        {
-            using var rng = RandomNumberGenerator.Create();
-            var bytes = new byte[32];
-            rng.GetBytes(bytes);
-            return BitConverter.ToString(bytes).Replace("-", "").ToLower();
-        }
+    private string ComputeSha256Hash(string rawData)
+    {
+        using var sha256 = SHA256.Create();
+        var bytes = Encoding.UTF8.GetBytes(rawData);
+        var hash = sha256.ComputeHash(bytes);
+        return BitConverter.ToString(hash).Replace("-", "").ToLower();
     }
 }
