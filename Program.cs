@@ -6,10 +6,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using ebillets_jo2024.Data;
+// using ebillets_jo2024.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace ebillets_jo2024
+namespace ebillets_jo2024_API
 {
     public class Program
     {

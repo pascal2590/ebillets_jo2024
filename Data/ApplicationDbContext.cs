@@ -1,11 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ebillets_jo2024.Models;
+using ebillets_jo2024_API.Models;
 
-namespace ebillets_jo2024.Data
+namespace ebillets_jo2024_API.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
+        internal readonly object Utilisateur;
 
         public DbSet<Utilisateur> Utilisateurs { get; set; }
         public DbSet<Offre> Offres { get; set; }

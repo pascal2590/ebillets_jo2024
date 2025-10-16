@@ -1,9 +1,10 @@
-﻿using System;
+﻿using ebillets_jo2024.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ebillets_jo2024.Models
+namespace ebillets_jo2024_API.Models
 {
     [Table("utilisateur")]
     public class Utilisateur

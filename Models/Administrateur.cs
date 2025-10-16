@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ebillets_jo2024_API.Models;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 

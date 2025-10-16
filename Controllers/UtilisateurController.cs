@@ -1,5 +1,5 @@
-﻿using ebillets_jo2024.Data;
-using ebillets_jo2024.Models;
+﻿using ebillets_jo2024_API.Data;
+using ebillets_jo2024_API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;

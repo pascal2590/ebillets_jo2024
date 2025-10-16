@@ -1,21 +1,16 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ebillets_jo2024.Data;
 using ebillets_jo2024.Models;
 using System.Threading.Tasks;
+using ebillets_jo2024_API.Data;
 
-namespace ebillets_jo2024.Controllers
+namespace ebillets_jo2024_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PaiementController : ControllerBase
+    public class PaiementController(ApplicationDbContext context) : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
-
-        public PaiementController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+        private readonly ApplicationDbContext _context = context;
 
         [HttpPost("{idReservation}")]
         public async Task<IActionResult> PayerReservation(int idReservation)

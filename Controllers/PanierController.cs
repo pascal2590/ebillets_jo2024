@@ -1,23 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ebillets_jo2024.Data;
 using ebillets_jo2024.Models;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
+using ebillets_jo2024_API.Data;
 
-namespace ebillets_jo2024.Controllers
+namespace ebillets_jo2024_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PanierController : ControllerBase
+    public class PanierController(ApplicationDbContext context) : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
-
-        public PanierController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+        private readonly ApplicationDbContext _context = context;
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Panier>>> GetPaniers()

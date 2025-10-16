@@ -1,4 +1,3 @@
-using ebillets_jo2024.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -7,17 +6,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using Microsoft.OpenApi.Models;
+using ebillets_jo2024_API.Data;
 
-namespace ebillets_jo2024
+namespace ebillets_jo2024_API
 {
-    public class Startup
+    public class Startup(IConfiguration configuration)
     {
-        public IConfiguration Configuration { get; }
-
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+        public IConfiguration Configuration { get; } = configuration;
 
         // Méthode appelée au démarrage pour enregistrer les services
         public void ConfigureServices(IServiceCollection services)
@@ -39,12 +34,13 @@ namespace ebillets_jo2024
                 options.AddPolicy("AllowAngularClient", builder =>
                 {
                     builder.WithOrigins(
-                        "http://localhost:4200",     // ton app Angular sur ton PC
-                        "http://192.168.1.196:4200"  // ton app Angular sur ton téléphone (IP locale)
+                        "http://localhost:4200",    // ton appli Angular sur PC
+                        "http://127.0.0.1:4200",   // pour compatibilité
+                        "http://192.168.1.196:4200" // ton IP locale pour mobile
                     )
                     .AllowAnyHeader()
-                    .AllowAnyMethod();
-                    //.AllowCredentials();
+                    .AllowAnyMethod()
+                    .AllowCredentials(); // utile si tu gères des cookies/tokens
                 });
             });
 
@@ -72,7 +68,7 @@ namespace ebillets_jo2024
             app.UseRouting();
 
             // === Active la bonne stratégie CORS ===
-            app.UseCors("AllowAngularClient");
+            app.UseCors("AllowAngularClient"); // app.UseCors("AllowAngularClient")
 
             app.UseAuthorization();
 
