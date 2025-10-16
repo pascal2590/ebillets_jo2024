@@ -45,7 +45,7 @@ namespace ebillets_jo2024_API.Controllers
             // Hash du mot de passe
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(model.Password);
 
-            // Génère une clé utilisateur unique (exemple simple)
+            // Génère une clé utilisateur unique
             string cleUtilisateur = Guid.NewGuid().ToString("N").Substring(0, 12).ToUpper();
 
             var utilisateur = new Utilisateur

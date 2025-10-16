@@ -22,7 +22,7 @@ namespace ebillets_jo2024.Models
         public int IdOffre { get; set; }
 
         [Column("quantite")]
-        public int Quantite { get; set; } = 1; // si tu souhaites l'ajouter au schéma
+        public int Quantite { get; set; } = 1; // Pour ajout au schéma au cas où une offre permettrait plusieurs entrées
 
         [Required, StringLength(64)]
         [Column("cleReservation")]
@@ -46,6 +46,7 @@ namespace ebillets_jo2024.Models
         [ForeignKey("IdOffre")]
         public Offre Offre { get; set; }
 
+        // Relation
         public ICollection<Billet> Billets { get; set; }
 
         public Paiement Paiement { get; set; }

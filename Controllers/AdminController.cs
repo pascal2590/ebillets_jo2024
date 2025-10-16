@@ -15,7 +15,7 @@ public class AdminController : ControllerBase
     [HttpGet("VentesParOffre")]
     public async Task<IActionResult> VentesParOffre()
     {
-        // Si tu veux mapper la vue dans EF, crée une classe DTO et utilise FromSqlRaw
+        // Pour mapper la vue dans EF, créer une classe DTO et utiliser FromSqlRaw
         var ventes = await _context.Set<VentesParOffreDTO>()
             .FromSqlRaw("SELECT * FROM v_ventesparoffre")
             .ToListAsync();

@@ -34,13 +34,13 @@ namespace ebillets_jo2024_API
                 options.AddPolicy("AllowAngularClient", builder =>
                 {
                     builder.WithOrigins(
-                        "http://localhost:4200",    // ton appli Angular sur PC
-                        "http://127.0.0.1:4200",   // pour compatibilité
-                        "http://192.168.1.196:4200" // ton IP locale pour mobile
+                        "http://localhost:4200",    // IP appli Angular sur PC
+                        "http://127.0.0.1:4200",   // IP pour compatibilité
+                        "http://192.168.1.196:4200" // IP locale pour mobile
                     )
                     .AllowAnyHeader()
                     .AllowAnyMethod()
-                    .AllowCredentials(); // utile si tu gères des cookies/tokens
+                    .AllowCredentials(); // gèrer les cookies/tokens
                 });
             });
 

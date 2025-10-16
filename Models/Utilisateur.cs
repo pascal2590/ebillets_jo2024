@@ -39,6 +39,7 @@ namespace ebillets_jo2024_API.Models
         [Column("dateCreation")]
         public DateTime DateCreation { get; set; } = DateTime.Now;
 
+        // Relations
         public ICollection<Panier> Paniers { get; set; }
         public ICollection<Reservation> Reservations { get; set; }
     }

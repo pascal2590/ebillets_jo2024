@@ -20,6 +20,7 @@ namespace ebillets_jo2024.Models
         [ForeignKey("IdUtilisateur")]
         public Utilisateur Utilisateur { get; set; }
 
+        // Relation
         public ICollection<PanierOffre> PaniersOffres { get; set; }
     }
 }
