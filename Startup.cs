@@ -8,8 +8,6 @@ using Microsoft.Extensions.Hosting;
 using System;
 using Microsoft.OpenApi.Models;
 
-
-
 namespace ebillets_jo2024
 {
     public class Startup
@@ -35,12 +33,26 @@ namespace ebillets_jo2024
             // === Ajout des contrôleurs ===
             services.AddControllers();
 
-            // Optionnel : activer Swagger pour tester ton API
+            // === Configuration CORS ===
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAngularClient", builder =>
+                {
+                    builder.WithOrigins(
+                        "http://localhost:4200",     // ton app Angular sur ton PC
+                        "http://192.168.1.196:4200"  // ton app Angular sur ton téléphone (IP locale)
+                    )
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+                    //.AllowCredentials();
+                });
+            });
+
+            // === Swagger pour les tests ===
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "eBillets JO2024 API", Version = "v1" });
             });
-
         }
 
         // Méthode appelée pour configurer le pipeline HTTP
@@ -50,7 +62,6 @@ namespace ebillets_jo2024
             {
                 app.UseDeveloperExceptionPage();
 
-                // Swagger pour tester tes endpoints API
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
                 {
@@ -59,6 +70,9 @@ namespace ebillets_jo2024
             }
 
             app.UseRouting();
+
+            // === Active la bonne stratégie CORS ===
+            app.UseCors("AllowAngularClient");
 
             app.UseAuthorization();
 
