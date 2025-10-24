@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ebillets_jo2024.Models
+namespace ebillets_jo2024_API.Models
 {
     [Table("panier_offre")]
     public class PanierOffre
@@ -13,6 +13,7 @@ namespace ebillets_jo2024.Models
         public int IdOffre { get; set; }
 
         [Required]
+        [Column("quantite")]
         public int Quantite { get; set; } = 1;
 
         [ForeignKey("IdPanier")]

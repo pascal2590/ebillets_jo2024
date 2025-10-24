@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ebillets_jo2024.Models
+namespace ebillets_jo2024_API.Models
 {
     [Table("paiement")]
     public class Paiement

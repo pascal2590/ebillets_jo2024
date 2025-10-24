@@ -1,9 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ebillets_jo2024.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿//using ebillets_jo2024.Data;
+//using ebillets_jo2024.Models;
 using ebillets_jo2024_API.Data;
+using ebillets_jo2024_API.Models;
+using Microsoft.AspNetCore.Mvc;
+using QRCoder;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace ebillets_jo2024.Controllers
 {
@@ -18,63 +23,58 @@ namespace ebillets_jo2024.Controllers
             _context = context;
         }
 
-        // GET: api/Billet
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Billet>>> GetBillets()
-        {
-            return await _context.Billets
-                .Include(b => b.Offre)
-                .Include(b => b.Reservation)
-                .ToListAsync();
-        }
-
-        // GET: api/Billet/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Billet>> GetBillet(int id)
-        {
-            var billet = await _context.Billets
-                .Include(b => b.Offre)
-                .Include(b => b.Reservation)
-                .FirstOrDefaultAsync(b => b.IdBillet == id);
-
-            if (billet == null)
-                return NotFound();
-
-            return billet;
-        }
-
-        // POST: api/Billet
         [HttpPost]
-        public async Task<ActionResult<Billet>> PostBillet(Billet billet)
+        public IActionResult CreerBillets([FromBody] List<Billet> billets)
         {
-            _context.Billets.Add(billet);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetBillet), new { id = billet.IdBillet }, billet);
+            if (billets == null || billets.Count == 0)
+                return BadRequest("Aucun billet à créer.");
+
+            // Simulation d’un paiement
+            var paiementOk = true;
+            if (!paiementOk)
+                return BadRequest("Échec du paiement (simulation).");
+
+            foreach (var billet in billets)
+            {
+                var utilisateur = _context.Utilisateurs.FirstOrDefault(u => u.IdUtilisateur == billet.IdUtilisateur);
+                if (utilisateur == null)
+                    return BadRequest($"Utilisateur {billet.IdUtilisateur} introuvable.");
+
+                // 1. Génération d’une clé aléatoire pour ce billet
+                billet.CleSecrete = GenererCleAleatoire();
+
+                // 2. Clé finale = concaténation des deux clés
+                billet.CleFinale = utilisateur.CleUtilisateur + billet.CleSecrete;
+
+                // 3. Génération du QR code
+                billet.QrCode = GenererQrCodeBase64(billet.CleFinale);
+
+                billet.DateEmission = DateTime.Now;
+
+                _context.Billets.Add(billet);
+            }
+
+            _context.SaveChanges();
+            return Ok(new { message = "Billets créés avec succès (mock paiement + QR codes générés)" });
         }
 
-        // PUT: api/Billet/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutBillet(int id, Billet billet)
+        // Génération d’une clé aléatoire de 32 caractères
+        private string GenererCleAleatoire()
         {
-            if (id != billet.IdBillet)
-                return BadRequest();
-
-            _context.Entry(billet).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return NoContent();
+            using var rng = RandomNumberGenerator.Create();
+            var bytes = new byte[16];
+            rng.GetBytes(bytes);
+            return BitConverter.ToString(bytes).Replace("-", "");
         }
 
-        // DELETE: api/Billet/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBillet(int id)
+        // Génération du QR code encodé en base64
+        private string GenererQrCodeBase64(string data)
         {
-            var billet = await _context.Billets.FindAsync(id);
-            if (billet == null)
-                return NotFound();
-
-            _context.Billets.Remove(billet);
-            await _context.SaveChangesAsync();
-            return NoContent();
+            using var qrGenerator = new QRCodeGenerator();
+            using var qrCodeData = qrGenerator.CreateQrCode(data, QRCodeGenerator.ECCLevel.Q);
+            using var qrCode = new PngByteQRCode(qrCodeData);
+            var qrBytes = qrCode.GetGraphic(20);
+            return "data:image/png;base64," + Convert.ToBase64String(qrBytes);
         }
     }
 }

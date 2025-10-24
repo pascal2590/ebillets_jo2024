@@ -22,6 +22,9 @@ namespace ebillets_jo2024.Controllers
             _context = context;
         }
 
+        // ============================================
+        // 🔹 Vérification de connexion à la base
+        // ============================================
         [HttpGet("test-connexion")]
         public IActionResult TestConnexion()
         {
@@ -36,16 +39,18 @@ namespace ebillets_jo2024.Controllers
             }
         }
 
-
-
-        // GET: api/Utilisateur
+        // ============================================
+        // 🔹 GET : api/Utilisateur
+        // ============================================
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Utilisateur>>> GetUtilisateurs()
         {
             return await _context.Utilisateurs.ToListAsync();
         }
 
-        // GET: api/Utilisateur/5
+        // ============================================
+        // 🔹 GET : api/Utilisateur/{id}
+        // ============================================
         [HttpGet("{id}")]
         public async Task<ActionResult<Utilisateur>> GetUtilisateur(int id)
         {
@@ -57,12 +62,20 @@ namespace ebillets_jo2024.Controllers
             return utilisateur;
         }
 
-        // POST: api/Utilisateur
+        // ============================================
+        // 🔹 POST : api/Utilisateur (Inscription)
+        // ============================================
         [HttpPost]
         public async Task<ActionResult<Utilisateur>> PostUtilisateur(Utilisateur utilisateur)
         {
-            // Génération d'une clé unique et hachage du mot de passe
-            utilisateur.CleUtilisateur = GenerateKey();
+            if (string.IsNullOrWhiteSpace(utilisateur.MotDePasseHash))
+                return BadRequest("Le mot de passe est obligatoire.");
+
+            // ✅ Génère une clé utilisateur unique si absente
+            if (string.IsNullOrEmpty(utilisateur.CleUtilisateur))
+                utilisateur.CleUtilisateur = GenerateKey();
+
+            // ✅ Hachage sécurisé du mot de passe
             utilisateur.MotDePasseHash = HashPassword(utilisateur.MotDePasseHash);
 
             _context.Utilisateurs.Add(utilisateur);
@@ -71,40 +84,44 @@ namespace ebillets_jo2024.Controllers
             return CreatedAtAction(nameof(GetUtilisateur), new { id = utilisateur.IdUtilisateur }, utilisateur);
         }
 
-        private string GenerateKey()
-        {
-            using (var rng = RandomNumberGenerator.Create())
-            {
-                byte[] data = new byte[32];
-                rng.GetBytes(data);
-                return BitConverter.ToString(data).Replace("-", "").ToLower();
-            }
-        }
-
-        private string HashPassword(string password)
-        {
-            using (var sha256 = SHA256.Create())
-            {
-                var bytes = Encoding.UTF8.GetBytes(password);
-                var hash = sha256.ComputeHash(bytes);
-                return BitConverter.ToString(hash).Replace("-", "").ToLower();
-            }
-        }
-
-        // PUT: api/Utilisateur/5
+        // ============================================
+        // 🔹 PUT : api/Utilisateur/{id}
+        // ============================================
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUtilisateur(int id, Utilisateur utilisateur)
         {
             if (id != utilisateur.IdUtilisateur)
                 return BadRequest();
 
-            _context.Entry(utilisateur).State = EntityState.Modified;
+            var existingUser = await _context.Utilisateurs.FindAsync(id);
+            if (existingUser == null)
+                return NotFound();
+
+            // Mise à jour sécurisée
+            existingUser.Nom = utilisateur.Nom;
+            existingUser.Prenom = utilisateur.Prenom;
+            existingUser.Email = utilisateur.Email;
+
+            // Si le mot de passe est modifié, le rehacher
+            if (!string.IsNullOrEmpty(utilisateur.MotDePasseHash) &&
+                utilisateur.MotDePasseHash != existingUser.MotDePasseHash)
+            {
+                existingUser.MotDePasseHash = HashPassword(utilisateur.MotDePasseHash);
+            }
+
+            // Si la clé utilisateur est vide, on la régénère
+            if (string.IsNullOrEmpty(existingUser.CleUtilisateur))
+                existingUser.CleUtilisateur = GenerateKey();
+
+            _context.Entry(existingUser).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        // DELETE: api/Utilisateur/5
+        // ============================================
+        // 🔹 DELETE : api/Utilisateur/{id}
+        // ============================================
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUtilisateur(int id)
         {
@@ -116,6 +133,25 @@ namespace ebillets_jo2024.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        // ============================================
+        // 🔹 Méthodes utilitaires privées
+        // ============================================
+        private string GenerateKey()
+        {
+            using var rng = RandomNumberGenerator.Create();
+            var data = new byte[32];
+            rng.GetBytes(data);
+            return BitConverter.ToString(data).Replace("-", "").ToLower();
+        }
+
+        private string HashPassword(string password)
+        {
+            using var sha256 = SHA256.Create();
+            var bytes = Encoding.UTF8.GetBytes(password);
+            var hash = sha256.ComputeHash(bytes);
+            return BitConverter.ToString(hash).Replace("-", "").ToLower();
         }
     }
 }

@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ebillets_jo2024.Models;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using ebillets_jo2024_API.Data;
+using ebillets_jo2024_API.Models;
 
 namespace ebillets_jo2024_API.Controllers
 {

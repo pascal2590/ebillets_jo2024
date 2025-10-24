@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ebillets_jo2024.Models
+namespace ebillets_jo2024_API.Models
 {
     [Table("offre")]
     public class Offre

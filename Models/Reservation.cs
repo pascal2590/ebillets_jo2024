@@ -1,10 +1,9 @@
-﻿using ebillets_jo2024_API.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ebillets_jo2024.Models
+namespace ebillets_jo2024_API.Models
 {
     [Table("reservation")]
     public class Reservation
@@ -24,7 +23,8 @@ namespace ebillets_jo2024.Models
         [Column("quantite")]
         public int Quantite { get; set; } = 1; // Pour ajout au schéma au cas où une offre permettrait plusieurs entrées
 
-        [Required, StringLength(64)]
+        //[Required]
+        [StringLength(128)]
         [Column("cleReservation")]
         public string CleReservation { get; set; }
 
@@ -34,6 +34,8 @@ namespace ebillets_jo2024.Models
         [Column("qrcode")]
         public string QrCode { get; set; }
 
+        [Required]
+        [StringLength(50)]
         [Column("statut")]
         public string Statut { get; set; } = "En attente";
 

@@ -1,6 +1,6 @@
 ﻿using BCrypt.Net;
 //using ebillets_jo2024.Data;
-using ebillets_jo2024.Models;
+//using ebillets_jo2024.Models;
 using ebillets_jo2024_API.Data;
 using ebillets_jo2024_API.Models;
 using Microsoft.AspNetCore.Identity.Data;
@@ -55,7 +55,7 @@ namespace ebillets_jo2024_API.Controllers
                 Email = model.Email,
                 MotDePasseHash = passwordHash,
                 CleUtilisateur = cleUtilisateur,
-                Role = "Utilisateur"
+                Role = "Client"
             };
 
             _context.Utilisateurs.Add(utilisateur);
@@ -69,7 +69,8 @@ namespace ebillets_jo2024_API.Controllers
                     utilisateur.IdUtilisateur,
                     utilisateur.Nom,
                     utilisateur.Prenom,
-                    utilisateur.Email
+                    utilisateur.Email,
+                    utilisateur.Role
                 }
             });
         }

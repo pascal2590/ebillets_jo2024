@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ebillets_jo2024.Models;
 using ebillets_jo2024_API.Models;
 
 namespace ebillets_jo2024_API.Data
