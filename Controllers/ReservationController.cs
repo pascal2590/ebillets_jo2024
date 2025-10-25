@@ -225,6 +225,7 @@ public class ReservationController : ControllerBase
                 r.IdReservation,
                 r.CleReservation,
                 r.Statut,
+                r.DateReservation,
                 Offre = new
                 {
                     r.Offre.IdOffre,
