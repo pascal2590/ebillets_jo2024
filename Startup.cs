@@ -27,6 +27,8 @@ namespace ebillets_jo2024_API
 
             // === Ajout des contrôleurs ===
             services.AddControllers();
+            
+
 
             // === Configuration CORS ===
             services.AddCors(options =>
@@ -65,11 +67,20 @@ namespace ebillets_jo2024_API
                 });
             }
 
+            app.UseCors(builder =>
+                builder
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader());
+
+
             app.UseRouting();
 
             // === Active la bonne stratégie CORS ===
             app.UseCors("AllowAngularClient"); // app.UseCors("AllowAngularClient")
+                                               // app.UseCors("AllowAngular");
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

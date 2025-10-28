@@ -3,6 +3,7 @@
 using ebillets_jo2024_API.Data;
 using ebillets_jo2024_API.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using QRCoder;
 using System;
 using System.Collections.Generic;
@@ -76,5 +77,20 @@ namespace ebillets_jo2024.Controllers
             var qrBytes = qrCode.GetGraphic(20);
             return "data:image/png;base64," + Convert.ToBase64String(qrBytes);
         }
+
+        [HttpGet("utilisateur/{idUtilisateur}")]
+        public IActionResult GetBilletsByUtilisateur(int idUtilisateur)
+        {
+            var billets = _context.Billets
+                .Include(b => b.Offre) // 🔹 Inclut la table Offre
+                .Where(b => b.IdUtilisateur == idUtilisateur)
+                .ToList();
+
+            if (billets == null || billets.Count == 0)
+                return NotFound(new { message = "Aucun billet trouvé pour cet utilisateur." });
+
+            return Ok(billets);
+        }
+
     }
 }

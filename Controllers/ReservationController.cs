@@ -257,4 +257,29 @@ public class ReservationController : ControllerBase
         });
     }
 
+    [HttpGet("{idReservation}")]
+    public async Task<ActionResult> GetReservationById(int idReservation)
+    {
+        var reservation = await _context.Reservations
+            .Include(r => r.Offre)
+            .FirstOrDefaultAsync(r => r.IdReservation == idReservation);
+
+        if (reservation == null)
+            return NotFound("Réservation introuvable.");
+
+        return Ok(new
+        {
+            reservation.IdReservation,
+            reservation.CleReservation,
+            reservation.Statut,
+            Offre = new
+            {
+                reservation.Offre.IdOffre,
+                reservation.Offre.NomOffre,
+                reservation.Offre.Prix
+            }
+        });
+    }
+
+
 }
