@@ -26,8 +26,13 @@ namespace ebillets_jo2024_API
             );
 
             // === Ajout des contrôleurs ===
-            services.AddControllers();
-            
+            services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+                    options.JsonSerializerOptions.WriteIndented = true;
+                });
+
 
 
             // === Configuration CORS ===

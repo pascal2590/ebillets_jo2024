@@ -114,50 +114,13 @@ public class ReservationController : ControllerBase
             _context.Reservations.Add(reservation);
             await _context.SaveChangesAsync();
 
-            int nbBillets = offre.NbPersonnes * (item.Quantite <= 0 ? 1 : item.Quantite);
-            var billets = new List<Billet>();
-
-
-
-            for (int i = 0; i < nbBillets; i++)
-            {
-                var cleBillet = GenerateKey();
-
-                if (string.IsNullOrEmpty(user.CleUtilisateur))
-                   throw new Exception("CleUtilisateur est vide");
-                if (string.IsNullOrEmpty(reservation.CleReservation))
-                   throw new Exception("CleReservation est vide");
-                if (string.IsNullOrEmpty(cleBillet))
-                   throw new Exception("CleBillet est vide");               
-
-                Console.WriteLine($"DEBUG CleUtilisateur={user.CleUtilisateur}, CleReservation={reservation.CleReservation}, CleBillet={cleBillet}"); // Ligne de debug
-
-                var cleFinale = ComputeSha256Hash(user.CleUtilisateur + reservation.CleReservation + cleBillet);
-
-                if (string.IsNullOrEmpty(cleFinale))
-                    throw new Exception("Erreur génération cleFinale");
-
-                var billet = new Billet
-                {
-                    IdReservation = reservation.IdReservation,
-                    IdOffre = reservation.IdOffre,
-                    CleBillet = cleBillet,
-                    CleFinale = cleFinale,
-                    QrCode = "QR_" + cleFinale.Substring(0, 20),
-                    Statut = "Valide"
-                };
-                billets.Add(billet);
-            }
-
-
-            _context.Billets.AddRange(billets);
-            await _context.SaveChangesAsync();
+            
 
             reservationsCreees.Add(new
             {
                 reservation.IdReservation,
                 reservation.CleReservation,
-                Billets = billets.Select(b => new { b.IdBillet, b.CleFinale, b.QrCode })
+                //Billets = billets.Select(b => new { b.IdBillet, b.CleFinale, b.QrCode })
             });
         }
 
@@ -167,6 +130,8 @@ public class ReservationController : ControllerBase
             reservations = reservationsCreees
         });
     }
+
+
 
     // ============================================
     // 🔹 Modèles internes
