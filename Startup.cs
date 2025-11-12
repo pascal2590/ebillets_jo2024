@@ -1,12 +1,15 @@
+using ebillets_jo2024_API.Data;
+using ebillets_jo2024_API.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
 using Microsoft.OpenApi.Models;
-using ebillets_jo2024_API.Data;
+using System;
+using System.Linq;
+// using BCrypt.Net;
 
 namespace ebillets_jo2024_API
 {
@@ -92,6 +95,30 @@ namespace ebillets_jo2024_API
             {
                 endpoints.MapControllers();
             });
+
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                // Vérifie si un admin existe déjà
+                if (!context.Utilisateurs.Any(u => u.Email == "admin@example.fr"))
+                {
+                    var admin = new Utilisateur
+                    {
+                        Nom = "JO2024",
+                        Prenom = "Admin",
+                        Email = "admin@example.fr",
+                        MotDePasseHash = BCrypt.Net.BCrypt.HashPassword("pascal"),
+                        CleUtilisateur = "ADMINKEY123",
+                        Role = RoleUtilisateur.Administrateur
+                    };
+
+                    context.Utilisateurs.Add(admin);
+                    context.SaveChanges();
+
+                    Console.WriteLine("? Compte administrateur créé : admin@example.fr / Admin123!");
+                }
+            }
         }
     }
 }

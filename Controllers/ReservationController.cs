@@ -238,13 +238,40 @@ public class ReservationController : ControllerBase
             reservation.CleReservation,
             reservation.Statut,
             Offre = new
-            {
+            { 
                 reservation.Offre.IdOffre,
                 reservation.Offre.NomOffre,
                 reservation.Offre.Prix
             }
         });
     }
+
+    // ============================================
+    // 🔹 DELETE : /api/Reservation/{idReservation}
+    // ============================================
+    [HttpDelete("{idReservation}")]
+    public async Task<IActionResult> DeleteReservation(int idReservation)
+    {
+        var reservation = await _context.Reservations
+            .Include(r => r.Billets) // Inclure les billets associés
+            .FirstOrDefaultAsync(r => r.IdReservation == idReservation);
+
+        if (reservation == null)
+            return NotFound("Réservation introuvable.");
+
+        // Supprimer les billets associés
+        if (reservation.Billets.Any())
+        {
+            _context.Billets.RemoveRange(reservation.Billets);
+        }
+
+        // Supprimer la réservation
+        _context.Reservations.Remove(reservation);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Réservation supprimée avec succès." });
+    }
+
 
 
 }

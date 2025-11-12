@@ -55,7 +55,7 @@ namespace ebillets_jo2024_API.Controllers
                 Email = model.Email,
                 MotDePasseHash = passwordHash,
                 CleUtilisateur = cleUtilisateur,
-                Role = "Client"
+                Role = RoleUtilisateur.Client
             };
 
             _context.Utilisateurs.Add(utilisateur);

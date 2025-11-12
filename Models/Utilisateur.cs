@@ -33,7 +33,7 @@ namespace ebillets_jo2024_API.Models
         public string CleUtilisateur { get; set; }
 
         [Column("role")]
-        public string Role { get; set; } = "Client";
+        public RoleUtilisateur Role { get; set; } = RoleUtilisateur.Client;
 
         [Column("dateCreation")]
         public DateTime DateCreation { get; set; } = DateTime.Now;

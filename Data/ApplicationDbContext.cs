@@ -21,6 +21,11 @@ namespace ebillets_jo2024_API.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // === Conversion enum RoleUtilisateur en string ===
+            modelBuilder.Entity<Utilisateur>()
+                .Property(u => u.Role)
+                .HasConversion<string>();
+
             // clé composite PanierOffre
             modelBuilder.Entity<PanierOffre>()
                 .HasKey(po => new { po.IdPanier, po.IdOffre });

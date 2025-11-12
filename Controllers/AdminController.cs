@@ -1,32 +1,52 @@
 ﻿using ebillets_jo2024_API.Data;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
 using System.Threading.Tasks;
 
-[Route("api/[controller]")]
-[ApiController]
-[Authorize(Policy = "RequireAdmin")]
-public class AdminController : ControllerBase
+namespace ebillets_jo2024_API.Controllers
 {
-    private readonly ApplicationDbContext _context;
-    public AdminController(ApplicationDbContext context) { _context = context; }
-
-    [HttpGet("VentesParOffre")]
-    public async Task<IActionResult> VentesParOffre()
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AdminController : ControllerBase
     {
-        // Pour mapper la vue dans EF, créer une classe DTO et utiliser FromSqlRaw
-        var ventes = await _context.Set<VentesParOffreDTO>()
-            .FromSqlRaw("SELECT * FROM v_ventesparoffre")
-            .ToListAsync();
-        return Ok(ventes);
-    }
-}
+        private readonly ApplicationDbContext _context;
 
-public class VentesParOffreDTO
-{
-    public int idOffre { get; set; }
-    public string nomOffre { get; set; }
-    public long nbBilletsVendus { get; set; }
-    public decimal totalVentes { get; set; }
+        public AdminController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        /// <summary>
+        /// Renvoie le nombre de billets vendus et le montant total par offre.
+        /// </summary>
+        [HttpGet("ventes-par-offre")]
+        public async Task<IActionResult> GetVentesParOffre()
+        {
+            try
+            {
+                var result = await _context.Offres
+                    .Select(o => new
+                    {
+                        o.IdOffre,
+                        NomOffre = o.NomOffre,
+                        Prix = o.Prix,
+                        NbVentes = _context.Billets
+                            .Count(b => b.IdOffre == o.IdOffre),
+                        MontantTotal = _context.Billets
+                            .Where(b => b.IdOffre == o.IdOffre)
+                            .Count() * o.Prix
+                    })
+                    .OrderByDescending(x => x.MontantTotal)
+                    .ToListAsync();
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur serveur : {ex.Message}");
+            }
+        }
+    }
 }
