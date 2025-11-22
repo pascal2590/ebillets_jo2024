@@ -17,10 +17,10 @@ namespace ebillets_jo2024_API
     {
         public IConfiguration Configuration { get; } = configuration;
 
-        // MÈthode appelÈe au dÈmarrage pour enregistrer les services
+        // M√©thode appel√©e au d√©marrage pour enregistrer les services
         public void ConfigureServices(IServiceCollection services)
         {
-            // === Connexion ‡ la base MySQL ===
+            // === Connexion √© la base MySQL ===
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseMySql(
                     Configuration.GetConnectionString("DefaultConnection"),
@@ -28,7 +28,7 @@ namespace ebillets_jo2024_API
                 )
             );
 
-            // === Ajout des contrÙleurs ===
+            // === Ajout des contr√©leurs ===
             services.AddControllers()
                 .AddJsonOptions(options =>
                 {
@@ -45,12 +45,12 @@ namespace ebillets_jo2024_API
                 {
                     builder.WithOrigins(
                         "http://localhost:4200",    // IP appli Angular sur PC
-                        "http://127.0.0.1:4200",   // IP pour compatibilitÈ
+                        "http://127.0.0.1:4200",   // IP pour compatibilit√©
                         "http://192.168.1.196:4200" // IP locale pour mobile
                     )
                     .AllowAnyHeader()
                     .AllowAnyMethod()
-                    .AllowCredentials(); // gËrer les cookies/tokens
+                    .AllowCredentials(); // g√©rer les cookies/tokens
                 });
             });
 
@@ -61,7 +61,7 @@ namespace ebillets_jo2024_API
             });
         }
 
-        // MÈthode appelÈe pour configurer le pipeline HTTP
+        // M√©thode appel√©e pour configurer le pipeline HTTP
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -84,7 +84,7 @@ namespace ebillets_jo2024_API
 
             app.UseRouting();
 
-            // === Active la bonne stratÈgie CORS ===
+            // === Active la bonne strat√©gie CORS ===
             app.UseCors("AllowAngularClient"); // app.UseCors("AllowAngularClient")
                                                // app.UseCors("AllowAngular");
 
@@ -95,12 +95,13 @@ namespace ebillets_jo2024_API
             {
                 endpoints.MapControllers();
             });
-
+            
+            // Cr√©e un compte administrateur par d√©faut s'il n'existe pas            
             using (var scope = app.ApplicationServices.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-                // VÈrifie si un admin existe dÈj‡
+                // V√©rifie si un admin existe d√©j√†
                 if (!context.Utilisateurs.Any(u => u.Email == "admin@example.fr"))
                 {
                     var admin = new Utilisateur
@@ -116,7 +117,7 @@ namespace ebillets_jo2024_API
                     context.Utilisateurs.Add(admin);
                     context.SaveChanges();
 
-                    Console.WriteLine("? Compte administrateur crÈÈ : admin@example.fr / Admin123!");
+                    Console.WriteLine("? Compte administrateur cr√©√© : admin@example.fr / Admin123!");
                 }
             }
         }

@@ -55,7 +55,7 @@ namespace ebillets_jo2024_API.Controllers
                 Email = model.Email,
                 MotDePasseHash = passwordHash,
                 CleUtilisateur = cleUtilisateur,
-                Role = RoleUtilisateur.Client
+                Role = model.Role == "Employe" ? RoleUtilisateur.Employe : RoleUtilisateur.Client
             };
 
             _context.Utilisateurs.Add(utilisateur);
@@ -106,12 +106,16 @@ namespace ebillets_jo2024_API.Controllers
     }
 
     // Classe utilisée pour recevoir la requête d'inscription
+    // Classe mise à jour pour recevoir le rôle
     public class RegisterRequest
     {
         public string Nom { get; set; }
         public string Prenom { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
+
+        // ✅ Nouveau : rôle optionnel
+        public string Role { get; set; } = "Client";
     }
 
     // Classe utilisée pour recevoir la requête de connexion

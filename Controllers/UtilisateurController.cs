@@ -1,4 +1,5 @@
 ﻿using ebillets_jo2024_API.Data;
+using ebillets_jo2024_API.Dtos;
 using ebillets_jo2024_API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -153,5 +154,28 @@ namespace ebillets_jo2024.Controllers
             var hash = sha256.ComputeHash(bytes);
             return BitConverter.ToString(hash).Replace("-", "").ToLower();
         }
+
+        [HttpPost("creer-employe")]
+        public async Task<IActionResult> CreerEmploye([FromBody] CreerEmployeDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.MotDePasse))
+                return BadRequest("Le mot de passe est obligatoire.");
+
+            var nouvelEmploye = new Utilisateur
+            {
+                Nom = dto.Nom,
+                Prenom = dto.Prenom,
+                Email = dto.Email,
+                Role = RoleUtilisateur.Employe,
+                CleUtilisateur = GenerateKey(),
+                MotDePasseHash = HashPassword(dto.MotDePasse)
+            };
+
+            _context.Utilisateurs.Add(nouvelEmploye);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Employé créé avec succès", id = nouvelEmploye.IdUtilisateur });
+        }
+
     }
 }
