@@ -26,6 +26,7 @@ _ReSharper*/
 TestResults/
 *.coverage
 *.coveragexml
+appsettings.Development.json
 
 # ===================================
 # Angular / Node.js / Front-end

@@ -3,8 +3,13 @@ using ebillets_jo2024_API.Models;
 
 namespace ebillets_jo2024_API.Data
 {
-    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
+    public class ApplicationDbContext : DbContext
     {
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
+        {
+        }
+
         public DbSet<Utilisateur> Utilisateurs { get; set; }
         public DbSet<Offre> Offres { get; set; }
         public DbSet<Reservation> Reservations { get; set; }

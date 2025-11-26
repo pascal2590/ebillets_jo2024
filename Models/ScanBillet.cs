@@ -22,13 +22,16 @@ namespace ebillets_jo2024_API.Models
         [Column("dateScan")]
         public DateTime DateScan { get; set; } = DateTime.Now;
 
-        [Column("resultat")]
-        public string Resultat { get; set; } = "Valide";
+        [Column("lieuScan")]
+        public string LieuScan { get; set; } = "ScanBillet";
 
-        [ForeignKey("IdBillet")]
+        [Column("resultatScan")]
+        public string ResultatScan { get; set; } = "Valide";  // ← ici le nom correspond à la colonne MySQL
+
+        // 🔹 Propriétés de navigation
         public Billet Billet { get; set; }
 
-        [ForeignKey("IdEmploye")]
+        // Suppose que tu as une entité Employe
         public Utilisateur Employe { get; set; }
     }
 }
