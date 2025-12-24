@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Linq;
+using System.Globalization;
 
 namespace ebillets_jo2024_API.Data
 {
@@ -18,8 +19,11 @@ namespace ebillets_jo2024_API.Data
 
         public void Seed()
         {
-            // Crée un admin si inexistant
-            if (!_context.Utilisateurs.Any(u => u.Email == "admin@example.fr"))
+            // Vérifie si l’admin existe déjà
+            var adminEmail = "admin@jo2024.fr";
+            var adminExiste = _context.Utilisateurs.Any(u => u.Email == adminEmail);
+
+            if (!adminExiste)
             {
                 var adminPassword = _configuration["AdminPassword"];
                 if (string.IsNullOrEmpty(adminPassword))
@@ -27,17 +31,22 @@ namespace ebillets_jo2024_API.Data
 
                 var admin = new Utilisateur
                 {
-                    Nom = "Admin",
+                    Nom = "JO2024",
                     Prenom = "Admin",
-                    Email = "admin@example.fr",
+                    Email = adminEmail,
                     MotDePasseHash = BCrypt.Net.BCrypt.HashPassword(adminPassword),
-                    CleUtilisateur = "ADMINKEY123",
+                    CleUtilisateur = "ADMINKEY2024",
                     Role = RoleUtilisateur.Administrateur
                 };
 
                 _context.Utilisateurs.Add(admin);
                 _context.SaveChanges();
+
+                // Log uniquement si l’admin vient d’être créé
+                var frenchDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm", CultureInfo.GetCultureInfo("fr-FR"));
+                Console.WriteLine($">>> ADMIN CREE - VERSION API DU {frenchDate} <<<");
             }
+            // Sinon, ne rien afficher
         }
     }
 }

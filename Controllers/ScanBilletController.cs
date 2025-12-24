@@ -67,7 +67,7 @@ public class ScanBilletController : ControllerBase
 
         _context.ScansBillets.Add(scan);
 
-        // Tous les scans faits → marquer le billet comme utilisé
+        // Si tous les scans faits → marquer le billet comme utilisé
         if (scansCount + 1 >= maxScans)
             billet.Statut = "Utilisé";
 

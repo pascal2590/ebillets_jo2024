@@ -36,10 +36,11 @@ namespace ebillets_jo2024_API.Models
         public RoleUtilisateur Role { get; set; } = RoleUtilisateur.Client;
 
         [Column("dateCreation")]
-        public DateTime DateCreation { get; set; } = DateTime.Now;
+        public DateTime DateCreation { get; set; } = DateTime.UtcNow;
 
-        // Relations
-        public ICollection<Panier> Paniers { get; set; }
-        public ICollection<Reservation> Reservations { get; set; }
+        // 1 utilisateur = 1 panier
+        public Panier Panier { get; set; }
+
+        public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
     }
 }

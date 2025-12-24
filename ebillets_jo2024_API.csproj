@@ -1,8 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <!-- <TargetFramework>netcoreapp3.1</TargetFramework> -->
+    
     <TargetFramework>net9.0</TargetFramework>
+
+    <!-- Version principale valide pour NuGet -->
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <!-- AssemblyInformationalVersion peut contenir un suffixe, ici horodatage -->
+    <InformationalVersion>1.0.0+$(Date:yyyyMMddHHmm)</InformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>

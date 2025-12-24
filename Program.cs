@@ -1,13 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-// using ebillets_jo2024.Data;
-using Microsoft.EntityFrameworkCore;
+using System;
+using System.Globalization;
+using Microsoft.Extensions.DependencyInjection;
+
 
 namespace ebillets_jo2024_API
 {
@@ -15,7 +12,15 @@ namespace ebillets_jo2024_API
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            var host = CreateHostBuilder(args).Build();
+
+            // Affichage de la version avant Run()
+            var logger = host.Services.GetRequiredService<ILogger<Program>>();
+            var frenchDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm", CultureInfo.GetCultureInfo("fr-FR"));
+            var buildVersion = DateTime.Now.ToString("yyyyMMddHHmm");
+            logger.LogInformation($">>> VERSION API DU {frenchDate} - BUILD {buildVersion} <<<");
+
+            host.Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -23,6 +28,7 @@ namespace ebillets_jo2024_API
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                    webBuilder.UseUrls("http://0.0.0.0:5000");
                 });
     }
 }

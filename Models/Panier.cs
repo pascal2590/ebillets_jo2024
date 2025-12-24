@@ -17,12 +17,12 @@ namespace ebillets_jo2024_API.Models
         public int IdUtilisateur { get; set; }
 
         [Column("dateCreation")]
-        public DateTime DateCreation { get; set; } = DateTime.Now;
+        public DateTime DateCreation { get; set; } = DateTime.UtcNow;
 
-        [ForeignKey("IdUtilisateur")]
+        [ForeignKey(nameof(IdUtilisateur))]
         public Utilisateur Utilisateur { get; set; }
 
-        // Relation
-        public ICollection<PanierOffre> PaniersOffres { get; set; }
+        // Toujours initialiser les collections
+        public ICollection<PanierOffre> PaniersOffres { get; set; } = new List<PanierOffre>();
     }
 }

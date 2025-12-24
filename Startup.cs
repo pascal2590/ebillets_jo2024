@@ -5,16 +5,24 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
 using System;
+using System.Globalization;
 
 namespace ebillets_jo2024_API
 {
-    public class Startup(IConfiguration configuration)
+    public class Startup
     {
-        public IConfiguration Configuration { get; } = configuration;
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
+            // Base de données MySQL
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseMySql(
                     Configuration.GetConnectionString("DefaultConnection"),
@@ -24,29 +32,13 @@ namespace ebillets_jo2024_API
 
             services.AddControllers();
 
-            // Note : l'origine doit contenir scheme + host + port exactement comme dans le navigateur
+            // CORS
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll", builder =>
                 {
-                    builder
-                        .AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader();
+                    builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
                 });
-                //options.AddPolicy("AllowAngularClient", builder =>
-                //{
-                //builder.WithOrigins(
-                //  "http://localhost:4200",            // Angular dev sur PC (http)
-                // "https://localhost:4200",           // Angular dev si servi en https
-                //   "http://127.0.0.1:4200",
-                //  "http://192.168.1.196:4200",       // Angular sur PC, accessible depuis téléphone (http)
-                //  "https://192.168.1.196:4200"       // si tu sers Angular en https
-                //)
-                //.AllowAnyHeader()
-                //.AllowAnyMethod()
-                //.AllowCredentials(); // si Angular utilise withCredentials
-                //});
             });
 
             services.AddSwaggerGen();
@@ -61,22 +53,34 @@ namespace ebillets_jo2024_API
                 app.UseSwaggerUI();
             }
 
+            var forwardedHeadersOptions = new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            };
+            forwardedHeadersOptions.KnownNetworks.Clear();
+            forwardedHeadersOptions.KnownProxies.Clear();
+            app.UseForwardedHeaders(forwardedHeadersOptions);
+
             app.UseRouting();
-
-            // Appliquer la policy CORS ici (après UseRouting, avant Auth)
-            //app.UseCors("AllowAngularClient");
-
-            app.UseCors("AllowAll"); // une seule stratégie, avant auth
+            app.UseCors("AllowAll");
 
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });            
 
-            // DataSeeder
-            using var scope = app.ApplicationServices.CreateScope();
-            var seeder = new DataSeeder(scope.ServiceProvider.GetRequiredService<ApplicationDbContext>(), Configuration);
-            seeder.Seed();
+            // Seed des données (admin) - Voir fichier DataSeeder.cs
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+
+                var seeder = new DataSeeder(context, configuration);
+                seeder.Seed(); // Affiche le log si l'admin est créé
+            }
         }
     }
 }

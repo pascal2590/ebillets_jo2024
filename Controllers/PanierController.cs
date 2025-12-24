@@ -5,8 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
+using ebillets_jo2024_API.Models.DTO;
 
 namespace ebillets_jo2024_API.Controllers
 {
@@ -46,119 +46,90 @@ namespace ebillets_jo2024_API.Controllers
             return panier;
         }
 
-        /// <summary>
-        /// 🔹 Ajoute une offre dans le panier d’un utilisateur.
-        /// Si le panier n’existe pas, il est créé automatiquement.
-        /// </summary>
+        /// Ajoute une offre dans le panier        
         [HttpPost("ajouter")]
-        public async Task<IActionResult> AjouterAuPanier([FromBody] JsonElement data)
+        public async Task<IActionResult> AjouterAuPanier([FromBody] PanierOffreDto panierOffreDto)
         {
-            if (data.ValueKind != JsonValueKind.Object)
-                return BadRequest("Format JSON invalide.");
+            Console.WriteLine($"DEBUG: Requête reçue pour utilisateur {panierOffreDto.IdUtilisateur} et offre {panierOffreDto.IdOffre}");
 
-            int idUtilisateur = data.GetProperty("idUtilisateur").GetInt32();
-            int idOffre = data.GetProperty("idOffre").GetInt32();
-            int quantite = data.TryGetProperty("quantite", out var q) ? q.GetInt32() : 1;
+            var utilisateur = await _context.Utilisateurs.FindAsync(panierOffreDto.IdUtilisateur);
+            if (utilisateur == null)
+            {
+                Console.WriteLine("DEBUG: Utilisateur non trouvé");
+                return BadRequest($"Utilisateur {panierOffreDto.IdUtilisateur} n'existe pas.");
+            }
 
-            // 🔹 Étape 1 : récupérer ou créer le panier de l’utilisateur
+            var offre = await _context.Offres.FindAsync(panierOffreDto.IdOffre);
+            if (offre == null)
+            {
+                Console.WriteLine("DEBUG: Offre non trouvée");
+                return BadRequest($"Offre {panierOffreDto.IdOffre} n'existe pas.");
+            }
+
             var panier = await _context.Paniers
-                .FirstOrDefaultAsync(p => p.IdUtilisateur == idUtilisateur);
+                .Include(p => p.PaniersOffres)
+                .FirstOrDefaultAsync(p => p.IdUtilisateur == panierOffreDto.IdUtilisateur);
 
             if (panier == null)
             {
                 panier = new Panier
                 {
-                    IdUtilisateur = idUtilisateur,
-                    DateCreation = DateTime.Now
+                    IdUtilisateur = panierOffreDto.IdUtilisateur,
+                    DateCreation = DateTime.UtcNow
                 };
-
                 _context.Paniers.Add(panier);
                 await _context.SaveChangesAsync();
+                Console.WriteLine("DEBUG: Nouveau panier créé");
             }
 
-            // 🔹 Étape 2 : vérifier si l’offre existe déjà dans le panier
-            var panierOffre = await _context.PaniersOffres
-                .FirstOrDefaultAsync(po => po.IdPanier == panier.IdPanier && po.IdOffre == idOffre);
-
-            if (panierOffre != null)
+            // Vérifier si l'offre existe déjà dans le panier
+            var existe = panier.PaniersOffres.Any(po => po.IdOffre == panierOffreDto.IdOffre);
+            if (existe)
             {
-                // Si l’offre existe déjà, on incrémente la quantité
-                panierOffre.Quantite += quantite;
-            }
-            else
-            {
-                // Sinon, on l’ajoute
-                panierOffre = new PanierOffre
-                {
-                    IdPanier = panier.IdPanier,
-                    IdOffre = idOffre,
-                    Quantite = quantite
-                };
-                _context.PaniersOffres.Add(panierOffre);
+                Console.WriteLine("DEBUG: Offre déjà dans le panier");
+                return Conflict(new { message = "Cette offre est déjà dans le panier" });
             }
 
+            var panierOffre = new PanierOffre
+            {
+                IdPanier = panier.IdPanier,
+                IdOffre = panierOffreDto.IdOffre,
+                Quantite = panierOffreDto.Quantite
+            };
+
+            _context.PaniersOffres.Add(panierOffre);
             await _context.SaveChangesAsync();
 
-            return Ok(new
-            {
-                message = "✅ Offre ajoutée au panier avec succès",
-                panier.IdPanier
-            });
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePanier(int id)
-        {
-            var panier = await _context.Paniers.FindAsync(id);
-            if (panier == null)
-                return NotFound();
-
-            _context.Paniers.Remove(panier);
-            await _context.SaveChangesAsync();
-            return NoContent();
+            Console.WriteLine("DEBUG: Offre ajoutée avec succès");
+            return Ok(new { message = "Offre ajoutée au panier" });
         }
 
         [HttpGet("utilisateur/{idUtilisateur}")]
-        public async Task<IActionResult> GetPanierParUtilisateur(int idUtilisateur)
+        public IActionResult GetPanierUtilisateur(int idUtilisateur)
         {
-            var panier = await _context.Paniers
+            var panier = _context.Paniers
                 .Include(p => p.PaniersOffres)
-                    .ThenInclude(po => po.Offre)
-                .FirstOrDefaultAsync(p => p.IdUtilisateur == idUtilisateur);
+                .ThenInclude(po => po.Offre)
+                .FirstOrDefault(p => p.IdUtilisateur == idUtilisateur);
 
             if (panier == null)
-                return NotFound("Aucun panier trouvé pour cet utilisateur.");
+                return Ok(new List<PanierOffreDtoRetour>());
 
-            return Ok(panier);
+            var result = panier.PaniersOffres.Select(po => new PanierOffreDtoRetour
+            {
+                IdOffre = po.IdOffre,
+                NomOffre = po.Offre.NomOffre,
+                Prix = po.Offre.Prix,
+                Quantite = po.Quantite
+            }).ToList();
+
+            return Ok(result);
         }
 
-        [HttpDelete("supprimer/{idUtilisateur}/{idOffre}")]
-        public async Task<IActionResult> SupprimerDuPanier(int idUtilisateur, int idOffre)
-        {
-            // 🔹 Récupérer le panier de l'utilisateur
-            var panier = await _context.Paniers
-                .FirstOrDefaultAsync(p => p.IdUtilisateur == idUtilisateur);
-
-            if (panier == null)
-                return NotFound("Aucun panier trouvé pour cet utilisateur.");
-
-            // 🔹 Trouver l'offre à supprimer
-            var panierOffre = await _context.PaniersOffres
-                .FirstOrDefaultAsync(po => po.IdPanier == panier.IdPanier && po.IdOffre == idOffre);
-
-            if (panierOffre == null)
-                return NotFound("Offre non trouvée dans le panier.");
-
-            _context.PaniersOffres.Remove(panierOffre);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = "✅ Offre supprimée du panier." });
-        }
 
         [HttpDelete("utilisateur/{idUtilisateur}/offre/{idOffre}")]
-        public async Task<ActionResult> SupprimerOffre(int idUtilisateur, int idOffre)
+        public async Task<IActionResult> SupprimerOffre(int idUtilisateur, int idOffre)
         {
-            // Chercher le panier de l'utilisateur
             var panier = await _context.Paniers
                 .Include(p => p.PaniersOffres)
                 .FirstOrDefaultAsync(p => p.IdUtilisateur == idUtilisateur);
@@ -166,7 +137,6 @@ namespace ebillets_jo2024_API.Controllers
             if (panier == null)
                 return NotFound("Panier introuvable.");
 
-            // Chercher l'offre dans le panier
             var item = panier.PaniersOffres.FirstOrDefault(po => po.IdOffre == idOffre);
             if (item == null)
                 return NotFound("Offre introuvable dans le panier.");
@@ -177,8 +147,20 @@ namespace ebillets_jo2024_API.Controllers
             return NoContent();
         }
 
+        [HttpDelete("utilisateur/{idUtilisateur}/vider")]
+        public async Task<IActionResult> ViderPanier(int idUtilisateur)
+        {
+            var panier = await _context.Paniers
+                .Include(p => p.PaniersOffres)
+                .FirstOrDefaultAsync(p => p.IdUtilisateur == idUtilisateur);
 
+            if (panier == null)
+                return NotFound("Panier introuvable.");
 
+            _context.PaniersOffres.RemoveRange(panier.PaniersOffres);
+            await _context.SaveChangesAsync();
 
+            return Ok(new { message = "Panier vidé avec succès" });
+        }
     }
 }

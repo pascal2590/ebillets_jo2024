@@ -29,7 +29,18 @@ namespace ebillets_jo2024_API.Data
                 .Property(u => u.Role)
                 .HasConversion<string>();
 
-            // clé composite PanierOffre
+            // 🔹 Panier unique par utilisateur
+            modelBuilder.Entity<Panier>()
+                .HasIndex(p => p.IdUtilisateur)
+                .IsUnique();
+
+            modelBuilder.Entity<Panier>()
+                .HasOne(p => p.Utilisateur)
+                .WithOne(u => u.Panier)
+                .HasForeignKey<Panier>(p => p.IdUtilisateur)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // 🔹 PanierOffre : clé composite
             modelBuilder.Entity<PanierOffre>()
                 .HasKey(po => new { po.IdPanier, po.IdOffre });
 
@@ -45,6 +56,7 @@ namespace ebillets_jo2024_API.Data
                 .HasForeignKey(po => po.IdOffre)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // 🔹 Billets & Reservations
             modelBuilder.Entity<Billet>()
                 .HasOne(b => b.Reservation)
                 .WithMany(r => r.Billets)
