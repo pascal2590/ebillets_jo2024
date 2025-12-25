@@ -28,6 +28,12 @@ TestResults/
 *.coverage
 *.coveragexml
 appsettings.Development.json
+# ===================================
+# Pour éviter tout résidu de publish accidentel
+# ===================================
+*.runtimeconfig.json
+*.deps.json
+
 
 # ===================================
 # Angular / Node.js / Front-end
@@ -68,3 +74,11 @@ Aide/
 *.DS_Store
 Thumbs.db
 .vscode/
+# Sécurité publish / dotnet
+*.deps.json
+*.runtimeconfig.json
+
+# Logs serveur
+*.journal
+nohup.out
+
